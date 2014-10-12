@@ -7,6 +7,7 @@ package javaapplication1;
 
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
+import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -21,6 +22,7 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.swing.DefaultListModel;
+import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
@@ -47,6 +49,8 @@ public class Frame extends javax.swing.JFrame {
     
     public Frame() {
         initComponents();
+        ImageIcon icon = new ImageIcon("C:\\Users\\pasha\\Desktop\\16x16\\39.png");
+        this.setIconImage(icon.getImage());
     }
 
     //makes increment of register 
@@ -159,7 +163,6 @@ public class Frame extends javax.swing.JFrame {
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Машина натуральних регістрів, Кузь Павло, 343Ск");
         setForeground(new java.awt.Color(204, 204, 255));
-        setIconImage(getIconImage());
         setResizable(false);
         addWindowListener(new java.awt.event.WindowAdapter() {
             public void windowActivated(java.awt.event.WindowEvent evt) {
