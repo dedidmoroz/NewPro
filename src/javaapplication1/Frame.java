@@ -5,18 +5,14 @@
  */
 package javaapplication1;
 
-import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
-import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -25,7 +21,6 @@ import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
-import javax.swing.JTable;
 import javax.swing.KeyStroke;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -35,6 +30,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
  * @author pasha
  */
 public class Frame extends javax.swing.JFrame {
+    
     //log data
     private DefaultListModel defaultListModel = new DefaultListModel();
     //index for list model
@@ -403,6 +399,11 @@ public class Frame extends javax.swing.JFrame {
         jButton6.setFocusable(false);
         jButton6.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         jButton6.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        jButton6.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton6ActionPerformed(evt);
+            }
+        });
         jToolBar1.add(jButton6);
 
         jButton7.setIcon(new javax.swing.ImageIcon("C:\\Users\\pasha\\Desktop\\16x16\\73.png")); // NOI18N
@@ -501,6 +502,11 @@ public class Frame extends javax.swing.JFrame {
         jMenuItem3.setText("Виконати по-кроково");
         jMenuItem3.setToolTipText("Виконати по-кроково програму");
         jMenuItem3.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+        jMenuItem3.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem3ActionPerformed(evt);
+            }
+        });
         jMenu2.add(jMenuItem3);
 
         jMenuBar1.add(jMenu2);
@@ -606,7 +612,7 @@ public class Frame extends javax.swing.JFrame {
          
         jList1.setModel(defaultListModel);
     }//GEN-LAST:event_formWindowActivated
-    
+    //compile the regular expression and compare to enter comand
     private Pattern pattern;
     private Matcher matcher;
     //make parsing of the input command and execute it
@@ -703,9 +709,16 @@ public class Frame extends javax.swing.JFrame {
             
     }
   
+    //show is all paramets of program is init
+    private boolean isInit = false;
     //execute the program
     public void execute(){
-        defaultListModel.clear();
+        this.isInit = false;
+        this.defaultListModel.clear();
+        this.lst.clear();
+        this.listModelIndex = 0;
+        this.commandNumber = 1;
+        
         for(int i =0;i<jTable1.getRowCount();i++){
             if(jTable1.getValueAt(i, 1)!=null){
                 String com = (String) jTable1.getValueAt(i, 1);
@@ -721,14 +734,64 @@ public class Frame extends javax.swing.JFrame {
              
         } while(jTable1.getValueAt(commandNumber-1, 1)!= null);
         System.out.println("__________");
+    
         jTextField1.setText(String.valueOf(jTable2.getValueAt(0, 1)));
-        lst.clear();
+        jTextField2.setText(String.valueOf(commandNumber-1));
+        
         System.out.println(commandNumber);
         defaultListModel.add(listModelIndex, "________________");
         defaultListModel.add(listModelIndex+1, "Завершено");
-        listModelIndex = 0;
-        jTextField2.setText(String.valueOf(commandNumber-1));
-        this.commandNumber = 1;}
+        
+        this.lst.clear();
+        this.listModelIndex = 0;
+        this.commandNumber = 1;
+       
+    }
+    private int commandCount = 1; 
+    //execute the program by step
+    public void stepExecute(){
+        if(!isInit){
+            this.defaultListModel.clear();
+            
+            this.listModelIndex = 0;
+            this.commandNumber = 1;
+            this.defaultListModel.clear();
+            this.lst.clear();
+           
+            for(int i =0;i<jTable1.getRowCount();i++){
+                if(jTable1.getValueAt(i, 1)!=null && jTable1.getValueAt(i, 1).toString().length()!=0){
+                    String com = (String) jTable1.getValueAt(i, 1);
+                    commandCount++;
+                    lst.add(com);
+                }
+            }
+        }
+        isInit = true;
+        
+        if((this.commandNumber-1) < this.commandCount-1){
+            String command = lst.get(commandNumber-1);
+            parseCommand(command);
+            System.out.println(command);
+            System.out.println(commandNumber+" "+this.commandCount);
+        } else {
+            System.out.println("__________");
+            System.out.println(commandNumber);
+            
+            defaultListModel.add(listModelIndex, "________________");
+            defaultListModel.add(listModelIndex+1, "Завершено");
+            
+            jTextField1.setText(String.valueOf(jTable2.getValueAt(0, 1)));
+            jTextField2.setText(String.valueOf(commandNumber-1));
+            
+            this.lst.clear();
+            this.listModelIndex = 0;
+            
+            this.commandNumber = 1;
+            this.commandCount = 1;
+        
+            this.isInit = false;
+        }
+    }
     //new program menu item
     public void newProgram(){ 
         for(int i = 0;i<jTable1.getRowCount();i++){
@@ -772,6 +835,7 @@ public class Frame extends javax.swing.JFrame {
     }
      //Load menu item
     public void loadFromFile(){
+         newProgram();
          JFileChooser chooser = new JFileChooser();
          FileFilter filter = new FileNameExtensionFilter("Natural Register Machine", "nrm");
          chooser.setFileFilter(filter);
@@ -784,9 +848,11 @@ public class Frame extends javax.swing.JFrame {
                   while((s = br.readLine())!=null){
                       loadCommands.add(s);
                   }
+                  System.out.println(loadCommands.size());
                   int comIndex = 0;
                   for(String i:loadCommands){
-                      jTable1.setValueAt(i, comIndex, 1);
+                      if(i.length()!=0)
+                        jTable1.setValueAt(i, comIndex, 1);
                       comIndex++;
                   }
               }catch(IOException e){
@@ -839,7 +905,14 @@ public class Frame extends javax.swing.JFrame {
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
         execute();
     }//GEN-LAST:event_jButton3ActionPerformed
- 
+     //execute program in steps menu item
+    private void jMenuItem3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem3ActionPerformed
+        stepExecute();
+    }//GEN-LAST:event_jMenuItem3ActionPerformed
+     //execute program in steps toolbar item
+    private void jButton6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton6ActionPerformed
+        stepExecute();
+    }//GEN-LAST:event_jButton6ActionPerformed
     public static void main(String args[]) {
         /* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
